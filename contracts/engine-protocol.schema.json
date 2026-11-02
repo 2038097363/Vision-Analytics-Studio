@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vision-analytics.local/contracts/engine-protocol.schema.json",
+  "title": "Vision Analytics engine request",
+  "type": "object",
+  "required": ["protocol_version", "request_id", "op"],
+  "properties": {
+    "protocol_version": { "const": 1 },
+    "request_id": { "type": "string", "minLength": 1 },
+    "task_id": { "type": "string" },
+    "op": { "type": "string", "minLength": 1 },
+    "payload": { "type": "object" }
+  },
+  "additionalProperties": false
+}

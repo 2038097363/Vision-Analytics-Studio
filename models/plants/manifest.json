@@ -1,0 +1,23 @@
+{
+  "id": "imageomics-bioclip-vit-b-16",
+  "source": "imageomics/bioclip",
+  "revision": "ce901ab3c6a913f9e9ef94ce6d27761069f4f01c",
+  "license": "MIT",
+  "catalog_revision": "cn-common-plants-v1-2026-09-19",
+  "files": [
+    {
+      "path": "weights/open_clip_pytorch_model.bin",
+      "size_bytes": 598599013,
+      "sha256": "e380384f0c30d425d8c6c40f24471f9dd497fbdfa734a89c461a94aee95f0ef4"
+    }
+  ],
+  "runtime": {
+    "open_clip_torch": "3.3.0",
+    "model_architecture": "ViT-B-16"
+  },
+  "product_scope": {
+    "supported_taxa": 20,
+    "automatic_confirmation": false,
+    "scores_calibrated": false
+  }
+}

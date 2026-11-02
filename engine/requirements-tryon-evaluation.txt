@@ -1,0 +1,12 @@
+# CUDA torch and torchvision are intentionally inherited from the host environment.
+safetensors==0.8.0
+einops==0.8.2
+fashn-human-parser==0.1.1
+transformers==5.17.0
+huggingface-hub==1.27.0
+onnxruntime==1.24.4
+opencv-python==4.13.0.92
+numpy==2.4.3
+Pillow==12.3.0
+tqdm==4.67.1
+matplotlib==3.10.0

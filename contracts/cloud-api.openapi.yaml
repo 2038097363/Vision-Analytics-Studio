@@ -1,0 +1,265 @@
+openapi: 3.1.0
+info:
+  title: Vision Analytics Studio Cloud API
+  version: 0.1.0-draft
+  description: Account and opt-in synchronization contract. Device paths and image bytes are excluded from normal JSON endpoints.
+servers:
+  - url: https://api.example.invalid/v1
+security:
+  - bearerAuth: []
+paths:
+  /auth/register:
+    post:
+      security: []
+      operationId: register
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '202':
+          description: Accepted with a non-enumerating response.
+        '400': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+  /auth/login:
+    post:
+      security: []
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated session.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+  /auth/refresh:
+    post:
+      security: []
+      operationId: refreshSession
+      description: Rotates the refresh token. Reuse of a rotated token revokes its token family.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [refresh_token]
+              properties:
+                refresh_token: { type: string, minLength: 32, maxLength: 1024 }
+      responses:
+        '200':
+          description: Rotated session.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '401': { $ref: '#/components/responses/Problem' }
+  /auth/logout:
+    post:
+      operationId: logout
+      responses:
+        '204': { description: Current device session revoked. }
+  /me:
+    get:
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Current authenticated user.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Problem' }
+  /devices:
+    get:
+      operationId: listDevices
+      responses:
+        '200':
+          description: User-owned device sessions.
+    post:
+      operationId: registerDevice
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201': { description: Device registered. }
+  /devices/{device_id}:
+    delete:
+      operationId: revokeDevice
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      responses:
+        '204': { description: Device and refresh sessions revoked. }
+        '404': { $ref: '#/components/responses/Problem' }
+  /sync/categories:
+    get:
+      operationId: getCategoryPreferences
+      responses:
+        '200': { description: Preferences and current server version. }
+    put:
+      operationId: putCategoryPreferences
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [base_version, manifest_version, categories]
+              properties:
+                base_version: { type: integer, minimum: 0 }
+                manifest_version: { type: integer, minimum: 1 }
+                categories:
+                  type: array
+                  maxItems: 64
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [id, enabled]
+                    properties:
+                      id: { type: string, pattern: '^[a-z0-9_-]{1,40}$' }
+                      enabled: { type: boolean }
+      responses:
+        '200': { description: Saved preferences and new version. }
+        '409': { $ref: '#/components/responses/Problem' }
+  /sync/photos:
+    get:
+      operationId: pullPhotoMetadata
+      parameters:
+        - name: after_version
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        '200': { description: Safe metadata changes. Never includes an absolute device path. }
+    post:
+      operationId: pushPhotoMetadata
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PhotoMetadata' }
+      responses:
+        '200': { description: Upserted record and server version. }
+        '409': { $ref: '#/components/responses/Problem' }
+  /sync/photos/{photo_id}/upload-ticket:
+    post:
+      operationId: createUploadTicket
+      description: Creates one short-lived object-storage upload authorization after opt-in and quota checks.
+      parameters:
+        - $ref: '#/components/parameters/PhotoId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201': { description: Short-lived single-object upload ticket. }
+        '403': { $ref: '#/components/responses/Problem' }
+        '413': { $ref: '#/components/responses/Problem' }
+  /account/export:
+    post:
+      operationId: requestAccountExport
+      responses:
+        '202': { description: Export job accepted after recent authentication. }
+  /account:
+    delete:
+      operationId: deleteAccount
+      responses:
+        '202': { description: Sessions revoked and deletion workflow started after recent authentication. }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque-access-token
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, format: uuid }
+    DeviceId:
+      name: device_id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    PhotoId:
+      name: photo_id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  schemas:
+    RegisterRequest:
+      type: object
+      additionalProperties: false
+      required: [email, display_name, password]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        display_name: { type: string, minLength: 1, maxLength: 80 }
+        password: { type: string, minLength: 15, maxLength: 128 }
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password, device_name]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, minLength: 1, maxLength: 128 }
+        device_name: { type: string, minLength: 1, maxLength: 120 }
+    Session:
+      type: object
+      additionalProperties: false
+      required: [access_token, access_expires_in, refresh_token, refresh_expires_in, device_id, user_id, display_name]
+      properties:
+        access_token: { type: string }
+        access_expires_in: { type: integer, maximum: 900 }
+        refresh_token: { type: string }
+        refresh_expires_in: { type: integer }
+        device_id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        display_name: { type: string, minLength: 1, maxLength: 80 }
+    User:
+      type: object
+      additionalProperties: false
+      required: [id, email, display_name]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email, maxLength: 254 }
+        display_name: { type: string, minLength: 1, maxLength: 80 }
+    PhotoMetadata:
+      type: object
+      additionalProperties: false
+      required: [id, device_id, client_photo_id, base_version, cloud_sync_enabled]
+      properties:
+        id: { type: string, format: uuid }
+        device_id: { type: string, format: uuid }
+        client_photo_id: { type: string, format: uuid }
+        base_version: { type: integer, minimum: 0 }
+        safe_category_id: { type: [string, 'null'], pattern: '^[a-z0-9_-]{1,40}$' }
+        classification_source: { type: [string, 'null'], enum: [local_model, manual, null] }
+        classification_revision: { type: [string, 'null'], maxLength: 120 }
+        cloud_sync_enabled: { type: boolean }
+    ProblemDetails:
+      type: object
+      additionalProperties: false
+      required: [type, title, status, request_id]
+      properties:
+        type: { type: string, format: uri-reference }
+        title: { type: string }
+        status: { type: integer }
+        code: { type: string }
+        request_id: { type: string, format: uuid }
+  responses:
+    Problem:
+      description: Error response without credential or account-enumeration details.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }

@@ -1,0 +1,28 @@
+{
+  "id": "fashn-vton-1.5-evaluation",
+  "source_revision": "7c0f10af3f91ad4048fe9729c470a13ef905d25a",
+  "model_revision": "7720683168567eb5a2a4c67f15116c6e29c83ded",
+  "dwpose_revision": "548b5df25b84d9f4aac0611dfa1c2a7a12f15571",
+  "human_parser_revision": "1f80c34dbab321c5730dda5c3fea279fd3e97498",
+  "model_url": "https://huggingface.co/fashn-ai/fashn-vton-1.5",
+  "installed_weight_bytes": 2550960249,
+  "target_resolution": "576x864",
+  "expected_vram_gib": 8,
+  "evaluation": {
+    "device": "NVIDIA GeForce RTX 5060 Laptop GPU 8GB",
+    "python": "3.13.5",
+    "torch": "2.11.0+cu128",
+    "precision": "bfloat16",
+    "timesteps": 20,
+    "generation_seconds": 33,
+    "result": "passed"
+  },
+  "files": [
+    {"path": "weights/model.safetensors", "bytes": 1943668048, "sha256": "d6cd38286885bc29fa487ea9383f80ffeb95862e7747c630d42c5d3c05bdd35a"},
+    {"path": "weights/dwpose/yolox_l.onnx", "bytes": 216746733, "sha256": "7860ae79de6c89a3c1eb72ae9a2756c0ccfbe04b7791bb5880afabd97855a411"},
+    {"path": "weights/dwpose/dw-ll_ucoco_384.onnx", "bytes": 134399116, "sha256": "724f4ff2439ed61afb86fb8a1951ec39c6220682803b4a8bd4f598cd913b1843"},
+    {"path": "runtime cache/human-parser/model.safetensors", "bytes": 256146352, "sha256": "e43c8c8a9b04f28798f0a4630cf18caa2cdb27a0d454fae43a5716e6f7078244"}
+  ],
+  "release_status": "evaluation-passed-license-review-required",
+  "automatic_download": false
+}

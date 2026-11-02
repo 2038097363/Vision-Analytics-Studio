@@ -1,0 +1,33 @@
+{
+  "name": "vision-analytics-studio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "desktop:dev": "scripts\\with-msvc.cmd tauri dev",
+    "desktop:build": "scripts\\with-msvc.cmd tauri build",
+    "check:rust": "scripts\\with-msvc.cmd cargo check --manifest-path src-tauri\\Cargo.toml",
+    "check:engine": "powershell -NoProfile -Command \"'{\\\"protocol_version\\\":1,\\\"request_id\\\":\\\"smoke\\\",\\\"op\\\":\\\"health\\\",\\\"payload\\\":{}}' | python engine/worker.py --once\" && python -m unittest engine.test_worker engine.test_tryon_worker engine.test_hand_refiner_worker engine.test_plant_worker engine.test_lab_worker",
+    "check:server": "python -m unittest server.test_auth",
+    "check": "npm run build && npm run check:engine && npm run check:server && npm run check:rust"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-dialog": "^2.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  }
+}

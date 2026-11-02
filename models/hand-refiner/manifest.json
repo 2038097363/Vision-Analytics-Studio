@@ -1,0 +1,28 @@
+{
+  "id": "sd15-hand-inpaint-local",
+  "model_revision": "sd15-hand-inpaint-local-v1",
+  "automatic_download": false,
+  "release_status": "single-sample-evaluation-passed",
+  "expected_download_bytes": 2140000000,
+  "measured_peak_vram_mib": 2677,
+  "minimum_recommended_vram_gib": 6,
+  "isolation": "runtime/hand-refiner/.venv",
+  "sources": [
+    {
+      "name": "Stable Diffusion 1.5 Inpainting",
+      "url": "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-inpainting",
+      "license": "CreativeML OpenRAIL-M"
+    }
+  ],
+  "acceptance": {
+    "required": [
+      "both hands evaluated independently",
+      "phone and already-visible hands preserved",
+      "same-position source skin is the first colour reference",
+      "garment integrity does not regress",
+      "failed repair falls back to the pre-repair image"
+    ],
+    "completed_benchmark_images": 1,
+    "release_benchmark_images": 20
+  }
+}
